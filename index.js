@@ -1,6 +1,6 @@
 const express = require('express');
 const main = require('@whiskeysockets/baileys');
-const { default: makeWASocket, useMultiFileAuthState, delay, makeCacheableSignalKeyStore } = main;
+const { default: makeWASocket, useMultiFileAuthState, delay, Browsers } = main;
 const pino = require('pino');
 const fs = require('fs');
 
@@ -19,7 +19,6 @@ app.get('/code', async (req, res) => {
     
     num = num.replace(/[^0-9]/g, '');
 
-    // پرانا سیشن صاف کریں تاکہ ریٹ لمٹ بائی پاس ہو سکے
     if (fs.existsSync(`./session_${num}`)) {
         fs.rmSync(`./session_${num}`, { recursive: true, force: true });
     }
@@ -28,33 +27,24 @@ app.get('/code', async (req, res) => {
     
     try {
         const sock = makeWASocket({
-            auth: {
-                creds: state.creds,
-                keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" })),
-            },
+            auth: state,
             printQRInTerminal: false,
             logger: pino({ level: "fatal" }),
-            // واٹس ایپ بزنس اور میسنجر دونوں کے لیے نوٹیفیکیشن بھیجنے کا سب سے پکا براؤزر پیرامیٹر
-            browser: ["Chrome (Linux)", "", ""]
+            // واٹس ایپ بزنس کی آفیشل موبائل ایپ پروٹوکول آئی ڈی (یہ بلاک نہیں ہوتی)
+            browser: ["WhatsApp", "Safari", "17.4.1"]
         });
 
         if (!sock.authState.creds.registered) {
-            await delay(3000); // سرور کنکشن مستحکم کرنے کے لیے پاز
-            
-            try {
-                const code = await sock.requestPairingCode(num);
-                return res.json({ code: code });
-            } catch (pairingErr) {
-                console.log("Pairing Error:", pairingErr);
-                return res.status(500).json({ error: "WhatsApp Blocked Request" });
-            }
+            await delay(2000);
+            const code = await sock.requestPairingCode(num);
+            return res.json({ code: code });
         } else {
-            return res.status(400).json({ error: "Already Registered" });
+            return res.status(400).json({ error: "Already Linked" });
         }
 
     } catch (err) {
         console.log(err);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ error: "Server Error" });
     }
 });
 

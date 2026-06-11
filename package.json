@@ -1,0 +1,18 @@
+{
+  "name": "abdulqaddus-pair-code",
+  "version": "1.0.0",
+  "description": "Pair Code Generator for Abdulqaddus MD WhatsApp Bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.6.0",
+    "express": "^4.19.2",
+    "pino": "^9.1.0",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "author": "Abdul Qaddus",
+  "license": "MIT"
+}
+

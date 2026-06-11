@@ -1,6 +1,6 @@
 const express = require('express');
 const main = require('@whiskeysockets/baileys');
-const { default: makeWASocket, useMultiFileAuthState, delay } = main;
+const { default: makeWASocket, useMultiFileAuthState, delay, Browsers } = main;
 const pino = require('pino');
 const fs = require('fs');
 
@@ -26,7 +26,8 @@ app.get('/code', async (req, res) => {
             auth: state,
             printQRInTerminal: false,
             logger: pino({ level: "fatal" }),
-            browser: ["Ubuntu", "Chrome", "20.0.04"]
+            // یہاں آفیشل کروم ڈیسک ٹاپ سیٹ کر دیا ہے تاکہ واٹس ایپ بلاک نہ کرے
+            browser: Browsers.appropriate('Chrome')
         });
 
         if (!sock.authState.creds.registered) {
@@ -45,15 +46,12 @@ app.get('/code', async (req, res) => {
                 const credsData = fs.readFileSync(`./session_${num}/creds.json`, 'utf-8');
                 const base64Session = Buffer.from(credsData).toString('base64');
                 
-                // یہاں میں نے PRABATH-MD ہٹا کر آپ کا نام ABDULQADDUS-MD سیٹ کر دیا ہے
                 const sessionId = `ABDULQADDUS-MD;;;${base64Session}`;
                 
-                // آپ کے اپنے واٹس ایپ نمبر پر سیشن آئی ڈی جائے گی
                 await sock.sendMessage(sock.user.id, { 
                     text: `*SUCCESSFULLY CONNECTED!* 🎉\n\nHere is your ABDULQADDUS-MD Session ID:\n\n\`\`\`${sessionId}\`\`\`\n\nCopy this ID and deploy on Heroku.` 
                 });
                 
-                // سرور صاف رکھنے کے لیے فولڈر ڈیلیٹ
                 setTimeout(() => {
                     fs.rmSync(`./session_${num}`, { recursive: true, force: true });
                 }, 10000);

@@ -17,6 +17,7 @@ app.get('/code', async (req, res) => {
     let num = req.query.number;
     if (!num) return res.status(400).json({ error: "Number is required" });
     
+    // نمبر سے پلس یا اسپیس ختم کرنا
     num = num.replace(/[^0-9]/g, '');
 
     const { state, saveCreds } = await useMultiFileAuthState(`./session_${num}`);
@@ -26,26 +27,28 @@ app.get('/code', async (req, res) => {
             auth: state,
             printQRInTerminal: false,
             logger: pino({ level: "fatal" }),
-            // یہاں آفیشل کروم ڈیسک ٹاپ سیٹ کر دیا ہے تاکہ واٹس ایپ بلاک نہ کرے
-            browser: Browsers.appropriate('Chrome')
+            // نوٹیفیکیشن منگوانے کے لیے آفیشل واٹس ایپ ویب کی مستند ڈیوائس آئی ڈی
+            browser: ["Chromium", "Ubuntu", "Chrome/110.0.5481.177"]
         });
 
         if (!sock.authState.creds.registered) {
-            await delay(1500);
+            // سرور کو تھوڑا ٹائم دیں تاکہ وہ واٹس ایپ سرور سے مضبوط کنکشن بنا سکے
+            await delay(3000);
+            
+            // یہ لائن واٹس ایپ کو پش نوٹیفیکیشن بھیجنے پر مجبور کرے گی
             const code = await sock.requestPairingCode(num);
+            
             res.json({ code: code });
         }
 
         sock.ev.on('creds.update', saveCreds);
         
         sock.ev.on('connection.update', async (update) => {
-            const { connection, lastDisconnect } = update;
-            
+            const { connection } = update;
             if (connection === 'open') {
                 await delay(5000);
                 const credsData = fs.readFileSync(`./session_${num}/creds.json`, 'utf-8');
                 const base64Session = Buffer.from(credsData).toString('base64');
-                
                 const sessionId = `ABDULQADDUS-MD;;;${base64Session}`;
                 
                 await sock.sendMessage(sock.user.id, { 

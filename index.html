@@ -3,86 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ABDULQADDUS-MD Pair Code</title>
+    <title>ABDULQADDUS-MD MATRIX PAIR</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e1e2f, #252542);
-            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #000;
+            color: #00ff00;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        /* Matrix Rain Background effect */
+        .matrix-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            font-size: 12px;
+            color: rgba(0, 255, 0, 0.15);
+            line-height: 1;
+            white-space: nowrap;
+            z-index: 1;
+            pointer-events: none;
         }
         .container {
-            background: #2a2a48;
+            background: rgba(0, 15, 0, 0.85);
+            border: 2px solid #00ff00;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            border-radius: 5px;
+            box-shadow: 0 0 20px #00ff00;
             text-align: center;
             max-width: 400px;
-            width: 100%;
+            width: 90%;
+            z-index: 2;
         }
-        h2 { color: #00ffcc; margin-bottom: 10px; }
-        p { color: #aaa; font-size: 14px; }
+        h2 { 
+            color: #00ff00; 
+            margin-bottom: 10px; 
+            text-shadow: 0 0 10px #00ff00;
+            letter-spacing: 2px;
+        }
+        p { color: #88ff88; font-size: 13px; }
         input {
             width: 90%;
             padding: 12px;
             margin: 20px 0;
-            border: none;
-            border-radius: 8px;
-            background: #1b1b32;
-            color: white;
+            border: 1px solid #00ff00;
+            border-radius: 3px;
+            background: #000;
+            color: #00ff00;
             font-size: 16px;
             text-align: center;
+            font-weight: bold;
+            box-shadow: inset 0 0 5px #00ff00;
+        }
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px #00ff00;
         }
         button {
-            background: #25D366;
-            color: white;
+            background: #00ff00;
+            color: #000;
             border: none;
             padding: 12px 30px;
             font-size: 16px;
             font-weight: bold;
-            border-radius: 8px;
+            border-radius: 3px;
             cursor: pointer;
             transition: 0.3s;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px #00ff00;
         }
-        button:hover { background: #20ba59; }
-        #result {
+        button:hover { 
+            background: #000; 
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            box-shadow: 0 0 15px #00ff00;
+        }
+        .box-result {
             margin-top: 25px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #00ffcc;
-            letter-spacing: 5px;
-            background: #1b1b32;
-            padding: 10px;
-            border-radius: 8px;
+            background: #000;
+            border: 1px dashed #00ff00;
+            padding: 15px;
+            border-radius: 3px;
             display: none;
+            position: relative;
+        }
+        #result {
+            font-size: 26px;
+            font-weight: bold;
+            color: #00ff00;
+            letter-spacing: 5px;
+            text-shadow: 0 0 8px #00ff00;
+            margin-bottom: 10px;
+        }
+        .copy-btn {
+            background: #003300;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 5px 15px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .copy-btn:hover {
+            background: #00ff00;
+            color: #000;
+        }
+        .footer {
+            margin-top: 25px;
+            font-size: 11px;
+            color: #55bb55;
+            border-top: 1px solid #005500;
+            padding-top: 10px;
         }
     </style>
 </head>
 <body>
 
+<div class="matrix-bg" id="matrix"></div>
+
 <div class="container">
     <h2>🔮 ABDULQADDUS-MD</h2>
-    <p>Enter your WhatsApp number with country code (e.g., 923xxxxxxxx) to get your pairing code.</p>
+    <p>[SYSTEM: ENTER WHATSAPP NUMBER WITH COUNTRY CODE]</p>
     
-    <input type="text" id="number" placeholder="923001234567">
+    <input type="text" id="number" placeholder="e.g. 923278084152">
     <br>
-    <button onclick="getCode()">Get Pair Code</button>
+    <button onclick="getCode()">RUN PAIRING SYSTEM</button>
     
-    <div id="result">---</div>
+    <div class="box-result" id="boxResult">
+        <div id="result">---</div>
+        <button class="copy-btn" onclick="copyCode()">COPY CODE</button>
+    </div>
+
+    <div class="footer">
+        DEPLOY WITH ❤️ ABDUL QADDUS
+    </div>
 </div>
 
 <script>
+    // Matrix effect filler
+    const matrixEl = document.getElementById('matrix');
+    let rows = '';
+    for (let i = 0; i < 20; i++) {
+        rows += '0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 1 0 1 0 1 0 1 1 0 1<br>';
+    }
+    matrixEl.innerHTML = rows;
+
     async function getCode() {
         const num = document.getElementById('number').value;
+        const boxResult = document.getElementById('boxResult');
         const resultDiv = document.getElementById('result');
-        if(!num) return alert('Please enter a number!');
+        if(!num) return alert('ACCESS DENIED: Enter Number!');
         
-        resultDiv.style.display = 'block';
-        resultDiv.innerText = 'GENERATING...';
+        boxResult.style.display = 'block';
+        resultDiv.innerText = 'INJECTING...';
         
         try {
             const response = await fetch(`/code?number=${num}`);
@@ -90,11 +170,18 @@
             if(data.code) {
                 resultDiv.innerText = data.code;
             } else {
-                resultDiv.innerText = 'ERROR';
+                resultDiv.innerText = 'FAILED';
             }
         } catch (e) {
             resultDiv.innerText = 'ERROR';
         }
+    }
+
+    function copyCode() {
+        const text = document.getElementById('result').innerText;
+        if(text === 'INJECTING...' || text === 'ERROR' || text === 'FAILED') return;
+        navigator.clipboard.writeText(text);
+        alert('CODE COPIED TO CLIPBOARD!');
     }
 </script>
 

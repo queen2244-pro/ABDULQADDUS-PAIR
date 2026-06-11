@@ -1,6 +1,6 @@
 const express = require('express');
 const main = require('@whiskeysockets/baileys');
-const { default: makeWASocket, useMultiFileAuthState, delay, Browsers } = main;
+const { default: makeWASocket, useMultiFileAuthState, delay, makeCacheableSignalKeyStore } = main;
 const pino = require('pino');
 const fs = require('fs');
 
@@ -17,53 +17,44 @@ app.get('/code', async (req, res) => {
     let num = req.query.number;
     if (!num) return res.status(400).json({ error: "Number is required" });
     
-    // نمبر سے پلس یا اسپیس ختم کرنا
     num = num.replace(/[^0-9]/g, '');
+
+    // پرانا سیشن صاف کریں تاکہ ریٹ لمٹ بائی پاس ہو سکے
+    if (fs.existsSync(`./session_${num}`)) {
+        fs.rmSync(`./session_${num}`, { recursive: true, force: true });
+    }
 
     const { state, saveCreds } = await useMultiFileAuthState(`./session_${num}`);
     
     try {
         const sock = makeWASocket({
-            auth: state,
+            auth: {
+                creds: state.creds,
+                keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" })),
+            },
             printQRInTerminal: false,
             logger: pino({ level: "fatal" }),
-            // نوٹیفیکیشن منگوانے کے لیے آفیشل واٹس ایپ ویب کی مستند ڈیوائس آئی ڈی
-            browser: ["Chromium", "Ubuntu", "Chrome/110.0.5481.177"]
+            // واٹس ایپ بزنس اور میسنجر دونوں کے لیے نوٹیفیکیشن بھیجنے کا سب سے پکا براؤزر پیرامیٹر
+            browser: ["Chrome (Linux)", "", ""]
         });
 
         if (!sock.authState.creds.registered) {
-            // سرور کو تھوڑا ٹائم دیں تاکہ وہ واٹس ایپ سرور سے مضبوط کنکشن بنا سکے
-            await delay(3000);
+            await delay(3000); // سرور کنکشن مستحکم کرنے کے لیے پاز
             
-            // یہ لائن واٹس ایپ کو پش نوٹیفیکیشن بھیجنے پر مجبور کرے گی
-            const code = await sock.requestPairingCode(num);
-            
-            res.json({ code: code });
-        }
-
-        sock.ev.on('creds.update', saveCreds);
-        
-        sock.ev.on('connection.update', async (update) => {
-            const { connection } = update;
-            if (connection === 'open') {
-                await delay(5000);
-                const credsData = fs.readFileSync(`./session_${num}/creds.json`, 'utf-8');
-                const base64Session = Buffer.from(credsData).toString('base64');
-                const sessionId = `ABDULQADDUS-MD;;;${base64Session}`;
-                
-                await sock.sendMessage(sock.user.id, { 
-                    text: `*SUCCESSFULLY CONNECTED!* 🎉\n\nHere is your ABDULQADDUS-MD Session ID:\n\n\`\`\`${sessionId}\`\`\`\n\nCopy this ID and deploy on Heroku.` 
-                });
-                
-                setTimeout(() => {
-                    fs.rmSync(`./session_${num}`, { recursive: true, force: true });
-                }, 10000);
+            try {
+                const code = await sock.requestPairingCode(num);
+                return res.json({ code: code });
+            } catch (pairingErr) {
+                console.log("Pairing Error:", pairingErr);
+                return res.status(500).json({ error: "WhatsApp Blocked Request" });
             }
-        });
+        } else {
+            return res.status(400).json({ error: "Already Registered" });
+        }
 
     } catch (err) {
         console.log(err);
-        res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 });
 

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABDULQADDUS-MD Pair Code</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e2f, #252542);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #2a2a48;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 { color: #00ffcc; margin-bottom: 10px; }
+        p { color: #aaa; font-size: 14px; }
+        input {
+            width: 90%;
+            padding: 12px;
+            margin: 20px 0;
+            border: none;
+            border-radius: 8px;
+            background: #1b1b32;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+        }
+        button {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { background: #20ba59; }
+        #result {
+            margin-top: 25px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffcc;
+            letter-spacing: 5px;
+            background: #1b1b32;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🔮 ABDULQADDUS-MD</h2>
+    <p>Enter your WhatsApp number with country code (e.g., 923xxxxxxxx) to get your pairing code.</p>
+    
+    <input type="text" id="number" placeholder="923001234567">
+    <br>
+    <button onclick="getCode()">Get Pair Code</button>
+    
+    <div id="result">---</div>
+</div>
+
+<script>
+    async function getCode() {
+        const num = document.getElementById('number').value;
+        const resultDiv = document.getElementById('result');
+        if(!num) return alert('Please enter a number!');
+        
+        resultDiv.style.display = 'block';
+        resultDiv.innerText = 'GENERATING...';
+        
+        try {
+            const response = await fetch(`/code?number=${num}`);
+            const data = await response.json();
+            if(data.code) {
+                resultDiv.innerText = data.code;
+            } else {
+                resultDiv.innerText = 'ERROR';
+            }
+        } catch (e) {
+            resultDiv.innerText = 'ERROR';
+        }
+    }
+</script>
+
+</body>
+</html>
